@@ -1,16 +1,10 @@
-struct note {
-	int id;
-	char name[30];
-	char category[5];
-	int deposit;
-	char date[9];
-};
+#include <iostream>
 
 class LinkedList {
 
 private:
 	struct Node {
-		struct note data;
+		int data;
 		Node *next;
 		Node *prev;
 	};
@@ -33,9 +27,9 @@ public:
 		return length;
 	}
 
-	void pushNode(struct note memo) {
+	void addNode(int n) {
 		Node *tmp = new Node;
-		tmp->data = memo;
+		tmp->data = n;
 		tmp->next = NULL;
 		tmp->prev = NULL;
 
@@ -50,31 +44,27 @@ public:
 		length++;
 	}
 
-	struct note getHead() {
+	int getHead() {
 		if (head == NULL) {
 			throw std::out_of_range("List is empty");
 		}
 		return head->data;
 	}
 
-	struct note getTail() {
+	int getTail() {
 		if (tail == NULL) {
 			throw std::out_of_range("List is empty");
 		}
 		return tail->data;
 	}
 
-	struct note next() {
+	int next() {
 		if (current == NULL || current == tail) {
 			current = head;
 			return current->data;
 		}
 		current = current->next;
 		return current->data;
-	}
-
-	void clearIterator() {
-		current = head;
 	}
 
 	void remove(int index) {
@@ -98,4 +88,30 @@ public:
 
 		delete cur;
 	}
+
+	void print() {
+		Node *cur = head;
+		while (cur != NULL) {
+			std::cout << cur->data << " ";
+			cur = cur->next;
+		}
+		std::cout << std::endl;
+	}
 };
+
+int main() {
+	LinkedList a;
+	std::cout << "Length: " << a.getLength() << std::endl;
+	a.addNode(1);
+	a.addNode(2);
+	a.addNode(3);
+	a.addNode(9);
+	a.addNode(4);
+	a.addNode(7);
+	std::cout << "Length: " << a.getLength() << std::endl;
+	std::cout << "Head: " << a.getHead() << std::endl;
+	std::cout << "Tail: " << a.getTail() << std::endl;
+	a.print();
+	a.remove(4);
+	a.print();
+}
