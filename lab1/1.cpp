@@ -19,11 +19,6 @@ struct note getNote() {
   return memo;
 }
 
-std::ostream& operator << (std::ostream &out, const struct note memo) {
-	out << memo.id << " " << memo.name << " " << memo.category << " " << memo.deposit << " " << memo.date;
-  return out;
-}
-
 void clear() {
   while(std::cin.get() != '\n');
 }
@@ -56,27 +51,24 @@ void printListToFile(LinkedList list, FILE* f) {
   }
 }
 
-void printList(LinkedList list) {
-  struct note memo;
-  for (int i = 0; i < list.getLength(); i++) {
-    memo = list.next();
-    std::cout << memo << std::endl;
+void printTheBigestDeposit(LinkedList list) {
+  if (list.getLength() == 0) {
+    std::cout << ">> The list is empty" << std::endl;
+    return;
   }
-  list.clearIterator();
-}
 
-int getTheBigestDeposit(LinkedList list) {
-  int maxDeposit;
-  struct note memo;
+  int maxDeposit = -1;
   for (int i = 0; i < list.getLength(); i++) {
-    memo = list.next();
-    if(!strcmp(memo.category, "fast")) {
-      memo.deposit = memo.deposit;
-      if (maxDeposit < memo.deposit)
-        maxDeposit = memo.deposit;
+    if(!strcmp(list[i].category, "fast")) {
+      if (maxDeposit < list[i].deposit)
+        maxDeposit = list[i].deposit;
     }
   }
-  return maxDeposit;
+	if (maxDeposit == -1) {
+  	std::cout << ">> There are not any notes in 'fast' category" << std::endl;
+	} else {
+  	std::cout << ">> The bigest deposit is " << maxDeposit << std::endl;
+	}
 }
 
 void fileWork(FILE* f, char* fileName) {
@@ -89,41 +81,48 @@ void fileWork(FILE* f, char* fileName) {
   freopen(fileName, "wb", f);
 
   char command;
+  int id, sumToChange;
   while (flag) {
     std::cout << "<< ";
     std::cin >> command;
 
     switch (command) {
       case 'c':
-        list.pushNode(getNote());
         clear();
+        list.pushNode(getNote());
         break;
 
       case 'e':
+        std::cin >> id;
+        list[id - 1] = getNote();
         clear();
         break;
       
       case 'd':
+        std::cin >> id;
+        list.remove(id - 1);
         clear();
         break;
       
       case 'p':
         clear();
-        std::cout << ">> The bigest deposit is " << getTheBigestDeposit(list) << std::endl;
+        printTheBigestDeposit(list);
         break;
       
       case '+':
       case '-':
+        
         break;
 
       case 's':
-        printList(list);
+        list.print();
         break;
 
       case 'q':
         flag = 0;
         clear();
         printListToFile(list, f);
+				list.clear();
         system("clear");
         help();
         break;
