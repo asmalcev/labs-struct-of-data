@@ -28,22 +28,23 @@ void help() {
 }
 
 void fileHelp() {
-  std::cout << ">> COMMAND - DESCRIPTION\n   c - create new note\n   p - print the bigest deposit\n   + [ID] [SUM] - get [SUM] from [ID] account\n   - [ID] [SUM] - put [SUM] on [ID] account\n   d [ID] - delete note [ID]\n   q - quit\n";
+  std::cout << ">> COMMAND - DESCRIPTION\n   c - create new note\n   e [ID] - edit [ID] note\n   s - see all notes in casual format\n   l - see notes in listing mode\n   p - print the bigest deposit\n   + [ID] [SUM] - get [SUM] from [ID] account\n   - [ID] [SUM] - put [SUM] on [ID] account\n   d [ID] - delete note [ID]\n   w - clear console\n   q - quit\n";
 }
 
 LinkedList readFileToList(FILE* f) {
   LinkedList list;
   struct note memo;
 
-  while (fread(&memo, sizeof(memo), 1, f))
+  while (fread(&memo, sizeof(memo), 1, f)) {
     list.pushNode(memo);
+  }
 
 	fseek(f, 0, SEEK_SET);
 
   return list;
 }
 
-void printListToFile(LinkedList list, FILE* f) {
+void printListToFile(LinkedList &list, FILE* f) {
   struct note memo;
   for (int i = 0; i < list.getLength(); i++) {
     memo = list.next();
@@ -51,19 +52,76 @@ void printListToFile(LinkedList list, FILE* f) {
   }
 }
 
-void printTheBigestDeposit(LinkedList list) {
+void deleteById(LinkedList &list, int id) {
+  if (list.getLength() == 0) {
+    std::cout << ">> The list is empty" << std::endl;
+    return;
+  }
+  struct note memo; 
+
+  for (int i = 0; i < list.getLength(); i++) {
+    memo = list.next();
+    if (memo.id == id) {
+      list.remove(i);
+      list.clearIterator();
+      std::cout << ">> " << id << " note deleted" << std::endl;
+      return;
+    }
+  }
+
+  std::cout << ">> There are not any notes with " << id << " id" << std::endl;
+}
+
+
+void editById(LinkedList &list, int id) {
+  if (list.getLength() == 0) {
+    std::cout << ">> The list is empty" << std::endl;
+    return;
+  }
+  struct note memo;
+  std::cout << "warning: ID field is const" << std::endl;
+
+  for (int i = 0; i < list.getLength(); i++) {
+    memo = list.next();
+    if (memo.id == id) {
+      memo = getNote();
+      memo.id = id;
+      list[i] = memo;
+      list.clearIterator();
+      return;
+    }
+  }
+
+  std::cout << ">> There are not any notes with " << id << " id" << std::endl;
+}
+
+void changeDepositById(LinkedList &list, int id, int difDeposit, char command) {
+  if (list.getLength() == 0) {
+    std::cout << ">> The list is empty" << std::endl;
+    return;
+  }
+  struct note memo;
+
+  for (int i = 0; i < list.getLength(); i++) {
+    memo = list.next();
+    if (memo.id == id) {
+      list[i].deposit += difDeposit * (command == '+' ? 1 : -1);
+      list.clearIterator();
+      return;
+    }
+  }
+
+  std::cout << ">> There are not any notes with " << id << " id" << std::endl;
+}
+
+void printTheBigestDeposit(LinkedList &list) {
   if (list.getLength() == 0) {
     std::cout << ">> The list is empty" << std::endl;
     return;
   }
 
-  int maxDeposit = -1;
-  for (int i = 0; i < list.getLength(); i++) {
-    if(!strcmp(list[i].category, "fast")) {
-      if (maxDeposit < list[i].deposit)
-        maxDeposit = list[i].deposit;
-    }
-  }
+  int maxDeposit = list.findTheBigestDeposit();
+
 	if (maxDeposit == -1) {
   	std::cout << ">> There are not any notes in 'fast' category" << std::endl;
 	} else {
@@ -71,18 +129,78 @@ void printTheBigestDeposit(LinkedList list) {
 	}
 }
 
+void listingMode(LinkedList &list) {
+  char command;
+  struct note memo;
+  int i = 0, len;
+	bool errCommand = false;
+  while (true) {
+    system("clear");
+    std::cout << " ID | DEPOSIT |     NAME    | CATEGORY |   DATE   " << std::endl;
+    std::cout << "----+---------+-------------+----------+----------" << std::endl;
+
+    for (int j = 0; j < 10 && i < list.getLength(); j++, i++) {
+      memo = list.next();
+      printf("%4d|%9d|%13s|%10s|%10s\n", memo.id, memo.deposit, memo.name, memo.category, memo.date);
+    }
+    std::cout << "----+---------+-------------+----------+----------" << std::endl;
+    std::cout << "               < - prev; next - >" << std::endl;
+    std::cout << "                    q - quit" << std::endl;
+
+		if (errCommand) {
+      std::cout << "error: unknown command" << std::endl;
+			errCommand = false;
+		}
+    std::cout << "<< ";
+    std::cin >> command;
+
+    len = list.getLength();
+    switch (command) {
+      case '<':
+        clear();
+        if (i - 20 < 0) {
+          i = 0;
+          list.clearIterator();
+        } else {
+          if (i % 10 != 0) {
+            i = (i / 10) * 10 - 10;
+          } else {
+            i -= 20;
+          }
+          list.setIterator(i);
+        }
+        break;
+
+      case '>':
+        clear();
+        if (i == len) {
+          i = len - (len % 10);
+					list.setIterator(i);
+        }
+        break;
+
+      case 'q':
+        list.clearIterator();
+        return;
+      
+      default:
+        clear();
+				errCommand = true;
+        break;
+    }
+  }
+}
+
 void fileWork(FILE* f, char* fileName) {
   system("clear");
   std::cout << ">> Working with " << fileName << std::endl;
   fileHelp();
-  int flag = 1, difference;
 
   LinkedList list = readFileToList(f);
-  freopen(fileName, "wb", f);
 
   char command;
   int id, sumToChange;
-  while (flag) {
+  while (true) {
     std::cout << "<< ";
     std::cin >> command;
 
@@ -94,13 +212,13 @@ void fileWork(FILE* f, char* fileName) {
 
       case 'e':
         std::cin >> id;
-        list[id - 1] = getNote();
         clear();
+        editById(list, id);
         break;
       
       case 'd':
         std::cin >> id;
-        list.remove(id - 1);
+        deleteById(list, id);
         clear();
         break;
       
@@ -111,25 +229,50 @@ void fileWork(FILE* f, char* fileName) {
       
       case '+':
       case '-':
-        
+        std::cin >> id >> sumToChange;
+        clear();
+        changeDepositById(list, id, sumToChange, command);
         break;
 
       case 's':
-        list.print();
+        if (list.getLength() == 0) {
+          std::cout << ">> The list is empty" << std::endl;
+        } else {
+          list.print();
+        }
+        clear();
+        break;
+
+      case 'l':
+        if (list.getLength() == 0) {
+          std::cout << ">> The list is empty" << std::endl;
+        } else {
+          listingMode(list);
+          clear();
+          system("clear");
+          std::cout << ">> Working with " << fileName << std::endl;
+          fileHelp();
+        }
+        break;
+
+      case 'w':
+        system("clear");
+        std::cout << ">> Working with " << fileName << std::endl;
+        fileHelp();
         break;
 
       case 'q':
-        flag = 0;
         clear();
+        freopen(fileName, "wb", f);
         printListToFile(list, f);
 				list.clear();
         system("clear");
         help();
-        break;
+        return;
 
       default:
         clear();
-        printf("error: unknown command\n");
+        std::cout << "error: unknown command" << std::endl;
     }
   }
 }
@@ -165,6 +308,7 @@ int main() {
         f = fopen(fileName, "rb+");
         if (f == NULL) {
           std::cout << "error: could't open " << fileName << std::endl;
+          break;
         } else {
           fileWork(f, fileName);
         }

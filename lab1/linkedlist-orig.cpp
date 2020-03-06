@@ -128,13 +128,29 @@ public:
 		return current->data;
 	}
 
+	void setIterator(int index) {
+		current = head;
+		for (int i = 0; i < index - 1; i++) {
+			current = current->next;
+		}
+	}
+
+	void clearIterator() {
+		current = NULL;
+	}
+
 	void remove(int index) {
-		if (index < 0 || index >= length) {
+		if (index < 0 || index >= length || length == 0) {
 			throw std::out_of_range("Index is out of range");
 		} else if (index == 0) {
-			head = head->next;
-			delete head->prev;
-			head->prev = NULL;
+			if (length == 1) {
+				delete head;
+				tail = head = NULL;
+			} else {
+				head = head->next;
+				delete head->prev;
+				head->prev = NULL;
+			}
 		} else if (index == length - 1) {
 			tail = tail->prev;
 			delete tail->next;
@@ -155,6 +171,7 @@ public:
 			delete cur;
 		}
 		length--;
+		clearIterator();
 	}
 
 	void print() {
@@ -181,39 +198,7 @@ public:
 
 int main() {
 	LinkedList a;
-	std::cout << "Length: " << a.getLength() << std::endl;
 	a.pushNode(1);
-	a.pushNode(2);
-	a.pushNode(3);
-	a.pushNode(9);
-	a.pushNode(4);
-	a.pushNode(7);
-	std::cout << "Length: " << a.getLength() << std::endl;
-	std::cout << "Head: " << a.getHead() << std::endl;
-	std::cout << "Tail: " << a.getTail() << std::endl;
-	a.print();
-	a.remove(4);
-	a.print();
-	for (int i = 0; i < a.getLength(); i++)
-		std::cout << a.next() << " ";
-	std::cout << std::endl;
-	a.remove(0);
-	a.remove(3);
-	a.print();
-	std::cout << "Length: " << a.getLength() << std::endl;
-	a.clear();
-	std::cout << "Length: " << a.getLength() << std::endl;
-	a.print();
-	for (int i = 0; i < 10; i++)
-		a.pushNode(i);
-	a.print();
-	a[0] = 5;
 	a.print();
 	a.remove(0);
-	a.addNode(99, 3);
-	a.addNode(-4, 0);
-	for (int i = 0; i < a.getLength(); i++)
-		std::cout << a.prev() << " ";
-	std::cout << std::endl;
-	std::cout << "Length: " << a.getLength() << std::endl;
 }

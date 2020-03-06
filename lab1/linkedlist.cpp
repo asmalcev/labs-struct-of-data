@@ -1,9 +1,9 @@
 struct note {
 	int id;
-	int deposit;
-	char name[30];
-	char category[5];
-	char date[9];
+	int deposit;						
+	char name[12];
+	char category[5];					// std::array
+	char date[9];							// string_view 
 };
 
 std::ostream& operator << (std::ostream &out, const struct note memo) {
@@ -33,8 +33,17 @@ public:
 		length = 0;
 	}
 
+	LinkedList(const LinkedList &x) {
+		head = x.head;
+		current = x.current;
+		tail = x.tail;
+		length = x.length;
+		// std::cout << "coping constructor" << std::endl;
+	}
+
 	~LinkedList() {
 		clear();
+		// std::cout << "destructor" << std::endl;
 	}
 
 	void clear() {
@@ -47,6 +56,7 @@ public:
 		current = NULL;
 		tail = NULL;
 		length = 0;
+		// std::cout << "clearing master" << std::endl;
 	}
 
 	int getLength() const {
@@ -139,13 +149,29 @@ public:
 		return current->data;
 	}
 
-	void remove(int index) {
-		if (index < 0 || index >= length) {
+	void setIterator(int index) {
+		current = head;
+		for (int i = 0; i < index - 1; i++) {
+			current = current->next;
+		}
+	}
+
+	void clearIterator() {
+		current = NULL;
+	}
+
+		void remove(int index) {
+		if (index < 0 || index >= length || length == 0) {
 			throw std::out_of_range("Index is out of range");
 		} else if (index == 0) {
-			head = head->next;
-			delete head->prev;
-			head->prev = NULL;
+			if (length == 1) {
+				delete head;
+				tail = head = NULL;
+			} else {
+				head = head->next;
+				delete head->prev;
+				head->prev = NULL;
+			}
 		} else if (index == length - 1) {
 			tail = tail->prev;
 			delete tail->next;
@@ -166,6 +192,31 @@ public:
 			delete cur;
 		}
 		length--;
+		clearIterator();
+	}
+
+	void print() {
+		Node *cur = head;
+		while (cur != NULL) {
+			std::cout << cur->data << std::endl;
+			cur = cur->next;
+		}
+	}
+
+	int findTheBigestDeposit() {
+		Node* cur = head;
+		int maxDeposit = -1;
+
+		while (cur != NULL) {
+			if(!strcmp(cur->data.category, "fast")) {
+				if (maxDeposit < cur->data.deposit) {
+					maxDeposit = cur->data.deposit;
+				}
+			}
+			cur = cur->next;
+		}
+
+		return maxDeposit;
 	}
 
 	struct note &operator[] (int index) {
@@ -177,14 +228,6 @@ public:
 				cur = cur->next;
 			}
 			return cur->data;
-		}
-	}
-
-	void print() {
-		Node *cur = head;
-		while (cur != NULL) {
-			std::cout << cur->data << std::endl;
-			cur = cur->next;
 		}
 	}
 };
