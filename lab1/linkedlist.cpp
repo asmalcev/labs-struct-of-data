@@ -1,13 +1,26 @@
+union contribution {
+	long long int depositI;
+	double depositD;
+};
+
 struct note {
 	int id;
-	int deposit;						
+	contribution deposit;					
 	char name[12];
-	char category[5];					// std::array
-	char date[9];							// string_view 
+	char category[5];
+	char date[9];
+	bool isDepositDouble;
 };
 
 std::ostream& operator << (std::ostream &out, const struct note memo) {
-	out << memo.id << " " << memo.name << " " << memo.category << " " << memo.deposit << " " << memo.date;
+	out << memo.id << " " << memo.name << " " << memo.category << " ";
+	if (memo.isDepositDouble) {
+		out << memo.deposit.depositD;
+	} else {
+		out << memo.deposit.depositI;
+	}
+	out << " " << memo.date;
+
   return out;
 }
 
@@ -33,17 +46,8 @@ public:
 		length = 0;
 	}
 
-	LinkedList(const LinkedList &x) {
-		head = x.head;
-		current = x.current;
-		tail = x.tail;
-		length = x.length;
-		// std::cout << "coping constructor" << std::endl;
-	}
-
 	~LinkedList() {
 		clear();
-		// std::cout << "destructor" << std::endl;
 	}
 
 	void clear() {
@@ -56,7 +60,6 @@ public:
 		current = NULL;
 		tail = NULL;
 		length = 0;
-		// std::cout << "clearing master" << std::endl;
 	}
 
 	int getLength() const {
@@ -203,14 +206,20 @@ public:
 		}
 	}
 
-	int findTheBigestDeposit() {
+	double findTheBigestDeposit() {
 		Node* cur = head;
-		int maxDeposit = -1;
+		double maxDeposit = -1;
 
 		while (cur != NULL) {
 			if(!strcmp(cur->data.category, "fast")) {
-				if (maxDeposit < cur->data.deposit) {
-					maxDeposit = cur->data.deposit;
+				if (cur->data.isDepositDouble) {
+					if (cur->data.deposit.depositD > maxDeposit) {
+						maxDeposit = cur->data.deposit.depositD;
+					}
+				} else {
+					if ((double) cur->data.deposit.depositI < maxDeposit) {
+						maxDeposit = (double) cur->data.deposit.depositI;
+					}
 				}
 			}
 			cur = cur->next;

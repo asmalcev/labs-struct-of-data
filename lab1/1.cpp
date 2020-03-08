@@ -1,26 +1,72 @@
 #include <iostream>
 #include <string.h>
+#include <limits>
+#include <cmath>
 #include "linkedlist.cpp"
-
-struct note getNote() {
-  struct note memo;
-
-  std::cout << "Enter id" << std::endl;
-  std::cin >> memo.id;
-  std::cout << "Enter name" << std::endl;
-  std::cin >> memo.name;
-  std::cout << "Enter category (slow/fast)" << std::endl;
-  std::cin >> memo.category;
-  std::cout << "Enter sum of deposit" << std::endl;
-  std::cin >> memo.deposit;
-  std::cout << "Enter date of last operation in format DD.MM.YY" << std::endl;
-  std::cin >> memo.date;
-
-  return memo;
-}
 
 void clear() {
   while(std::cin.get() != '\n');
+}
+
+int rankOfNumber(int number) {
+  int rank = 10;
+  while ((number /= 10) > 0) {
+    rank *= 10;
+  }
+
+  return rank;
+}
+
+struct note getNote() {
+  struct note memo;
+  int control = 0, iPart, fPart;
+
+  while (!control) {
+    std::cout << "Enter id" << std::endl;
+    control = scanf("%d", &memo.id);
+    clear();
+  }
+  control = 0;
+  while (!control) {
+    std::cout << "Enter name" << std::endl;
+    control = scanf("%11s", memo.name);
+    clear();
+  }
+  control = 0;
+  while (!control) {
+    std::cout << "Enter category (slow/fast)" << std::endl;
+    control = scanf("%4s", memo.category);
+    control = !(strcmp(memo.category, "fast") && strcmp(memo.category, "slow"));
+    clear();
+  }
+  control = 0;
+  while (!control) {
+    std::cout << "Enter sum of deposit" << std::endl;
+    control = scanf("%d.%d", &iPart, &fPart);
+    clear();
+    switch(control) {
+      case 2:
+        memo.deposit.depositD = (double) iPart + (double) fPart / rankOfNumber(fPart);
+        memo.isDepositDouble = true;
+        break;
+
+      case 1:
+        memo.deposit.depositI = iPart;
+        memo.isDepositDouble = false;
+        break;
+
+      default:
+        break;
+    }
+  }
+  control = 0;
+  while (!control) {
+    std::cout << "Enter date of last operation in format DD.MM.YY" << std::endl;
+    control = scanf("%8s", memo.date);
+    clear();
+  }
+
+  return memo;
 }
 
 void help() {
@@ -95,7 +141,7 @@ void editById(LinkedList &list, int id) {
   std::cout << ">> There are not any notes with " << id << " id" << std::endl;
 }
 
-void changeDepositById(LinkedList &list, int id, int difDeposit, char command) {
+void changeDepositById(LinkedList &list, int id, double difDeposit, char command) {
   if (list.getLength() == 0) {
     std::cout << ">> The list is empty" << std::endl;
     return;
@@ -105,7 +151,13 @@ void changeDepositById(LinkedList &list, int id, int difDeposit, char command) {
   for (int i = 0; i < list.getLength(); i++) {
     memo = list.next();
     if (memo.id == id) {
-      list[i].deposit += difDeposit * (command == '+' ? 1 : -1);
+      if (memo.isDepositDouble) {
+        list[i].deposit.depositD += difDeposit * (command == '+' ? 1 : -1);
+      } else {
+        list[i].deposit.depositI = (double) memo.deposit.depositI + (double) difDeposit * (command == '+' ? 1 : -1);
+        list[i].isDepositDouble = true;
+      }
+      
       list.clearIterator();
       return;
     }
@@ -120,9 +172,9 @@ void printTheBigestDeposit(LinkedList &list) {
     return;
   }
 
-  int maxDeposit = list.findTheBigestDeposit();
+  double maxDeposit = list.findTheBigestDeposit();
 
-	if (maxDeposit == -1) {
+	if (abs(maxDeposit + 1) < __DBL_EPSILON__) {
   	std::cout << ">> There are not any notes in 'fast' category" << std::endl;
 	} else {
   	std::cout << ">> The bigest deposit is " << maxDeposit << std::endl;
@@ -136,16 +188,20 @@ void listingMode(LinkedList &list) {
 	bool errCommand = false;
   while (true) {
     system("clear");
-    std::cout << " ID | DEPOSIT |     NAME    | CATEGORY |   DATE   " << std::endl;
-    std::cout << "----+---------+-------------+----------+----------" << std::endl;
+    std::cout << " ID |  DEPOSIT  |     NAME    | CATEGORY |   DATE   " << std::endl;
+    std::cout << "----+-----------+-------------+----------+----------" << std::endl;
 
     for (int j = 0; j < 10 && i < list.getLength(); j++, i++) {
       memo = list.next();
-      printf("%4d|%9d|%13s|%10s|%10s\n", memo.id, memo.deposit, memo.name, memo.category, memo.date);
+      if (memo.isDepositDouble) {
+        printf("%4d|%11.2G|%13s|%10s|%10s\n", memo.id, memo.deposit.depositD, memo.name, memo.category, memo.date);
+      } else {
+        printf("%4d|%11lld|%13s|%10s|%10s\n", memo.id, memo.deposit.depositI, memo.name, memo.category, memo.date);
+      }
     }
-    std::cout << "----+---------+-------------+----------+----------" << std::endl;
-    std::cout << "               < - prev; next - >" << std::endl;
-    std::cout << "                    q - quit" << std::endl;
+    std::cout << "----+-----------+-------------+----------+----------" << std::endl;
+    std::cout << "                < - prev; next - >" << std::endl;
+    std::cout << "                     q - quit" << std::endl;
 
 		if (errCommand) {
       std::cout << "error: unknown command" << std::endl;
@@ -199,7 +255,8 @@ void fileWork(FILE* f, char* fileName) {
   LinkedList list = readFileToList(f);
 
   char command;
-  int id, sumToChange;
+  int id;
+  double sumToChange;
   while (true) {
     std::cout << "<< ";
     std::cin >> command;
@@ -266,8 +323,6 @@ void fileWork(FILE* f, char* fileName) {
         freopen(fileName, "wb", f);
         printListToFile(list, f);
 				list.clear();
-        system("clear");
-        help();
         return;
 
       default:
@@ -277,12 +332,20 @@ void fileWork(FILE* f, char* fileName) {
   }
 }
 
-int main() {
-  system("clear");
-  help();
-  char fileName[30];
-  char command;
+int main(int argc, char *argv[]) {
+	char fileName[30] = "";
+	char command;
+	bool didGetFileName = false;
   FILE *f;
+
+  if (argc != 1) {
+    strcat(fileName, argv[1]);
+		didGetFileName = true;
+  }
+  system("clear");
+
+  help();
+  
 	while (true) {
 		std::cout << "<< ";
 		std::cin >> command;
@@ -311,6 +374,8 @@ int main() {
           break;
         } else {
           fileWork(f, fileName);
+          system("clear");
+          help();
         }
 
         fclose(f);
