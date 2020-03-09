@@ -335,12 +335,19 @@ void fileWork(FILE* f, char* fileName) {
 int main(int argc, char *argv[]) {
 	char fileName[30] = "";
 	char command;
-	bool didGetFileName = false;
   FILE *f;
 
   if (argc != 1) {
-    strcat(fileName, argv[1]);
-		didGetFileName = true;
+    f = fopen(argv[1], "rb+");
+    if (f == NULL) {
+      std::cout << "error: could't open " << argv[1] << std::endl;
+    } else {
+      fileWork(f, argv[1]);
+      system("clear");
+      help();
+    }
+
+    fclose(f);
   }
   system("clear");
 

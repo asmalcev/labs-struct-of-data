@@ -1,10 +1,11 @@
 #include <iostream>
 
+template <typename T>
 class LinkedList {
 
 private:
 	struct Node {
-		int data;
+		T data;
 		Node *next;
 		Node *prev;
 	};
@@ -42,7 +43,7 @@ public:
 		return length;
 	}
 
-	void pushNode(int data) {
+	void pushNode(T data) {
 		Node *tmp = new Node;
 		tmp->data = data;
 		tmp->next = NULL;
@@ -58,7 +59,7 @@ public:
 		length++;
 	}
 
-	void shiftNode(int data) {
+	void shiftNode(T data) {
 		Node *tmp = new Node;
 		tmp->data = data;
 		tmp->prev = NULL;
@@ -74,7 +75,7 @@ public:
 		length++;
 	}
 
-	void addNode(int data, int index) {
+	void addNode(T data, int index) {
 		if (index < 0 || index >= length) {
 			throw std::out_of_range("Index is out of range");
 		} else if (index == 0) {
@@ -96,21 +97,21 @@ public:
 		}
 	}
 
-	int getHead() const {
+	T getHead() const {
 		if (head == NULL) {
 			throw std::out_of_range("List is empty");
 		}
 		return head->data;
 	}
 
-	int getTail() const {
+	T getTail() const {
 		if (tail == NULL) {
 			throw std::out_of_range("List is empty");
 		}
 		return tail->data;
 	}
 
-	int next() {
+	T next() {
 		if (current == NULL || current == tail) {
 			current = head;
 			return current->data;
@@ -119,7 +120,7 @@ public:
 		return current->data;
 	}
 
-	int prev() {
+	T prev() {
 		if (current == NULL || current == head) {
 			current = tail;
 			return current->data;
@@ -183,7 +184,7 @@ public:
 		std::cout << std::endl;
 	}
 
-	int &operator[] (int index) {
+	T &operator[] (int index) {
 		if (index < 0 || index >= length) {
 			throw std::out_of_range("Index is out of range");
 		} else {
@@ -197,7 +198,7 @@ public:
 };
 
 int main() {
-	LinkedList a;
+	LinkedList<int> a;
 	a.pushNode(1);
 	a.print();
 	a.remove(0);
