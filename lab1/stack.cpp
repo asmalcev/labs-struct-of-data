@@ -1,7 +1,7 @@
 template <typename T>
 class Stack {
 
-private:
+protected:
 	struct Node {
 		T data;
 		Node *below;

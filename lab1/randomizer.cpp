@@ -1,34 +1,11 @@
 #include <iostream>
 #include <vector>
+#include <string.h>
+#include <limits>
+#include <cmath>
 #include <ctime>
 #include <cstdlib>
-#include <cstring>
-
-union contribution {
-	long long int depositI;
-	double depositD;
-};
-
-struct note {
-	int id;
-	contribution deposit;					
-	char name[12];
-	char category[5];
-	char date[9];
-	bool isDepositDouble;
-};
-
-std::ostream& operator << (std::ostream &out, const struct note memo) {
-	out << memo.id << " " << memo.name << " " << memo.category << " ";
-	if (memo.isDepositDouble) {
-		out << memo.deposit.depositD;
-	} else {
-		out << memo.deposit.depositI;
-	}
-	out << " " << memo.date;
-
-  return out;
-}
+#include "linkedlist.cpp"
 
 int main(int argc, char *argv[]) {
 	char file_name[30] = "";
@@ -38,6 +15,8 @@ int main(int argc, char *argv[]) {
   } else {
     strcat(file_name, argv[1]);
   }
+
+	LinkedList list;
 
 	char names[][30] = {"alex", "mikle", "alexey", "danil", "kirill", "artem"};
 	char categories[][5] = {"fast", "slow"};
@@ -51,7 +30,7 @@ int main(int argc, char *argv[]) {
 
 	FILE* f = fopen(file_name, "wb");
 	for (size_t i = 0; i < times; i++) {
-		tmp.id = i;
+		tmp.id = list.getId();
 		if (rand() & 1) {
 			tmp.deposit.depositD = 1000 + rand() % 50 * 100 + (rand() % 100) / 100.0;
 			tmp.isDepositDouble = true;
@@ -61,10 +40,12 @@ int main(int argc, char *argv[]) {
 		}
 		sprintf(tmp.name, "%s", names[rand() % 6]);
 		sprintf(tmp.category, "%s", categories[rand() % 2]);
-		sprintf(tmp.date, "%02d.%02d.%02d", rand() % 29, rand() % 13, rand() % 100);
+		sprintf(tmp.date, "%02d.%02d.%4d", rand() % 28 + 1, rand() % 11 + 1, 2020 - (int) i);
 		std::cout << tmp << std::endl;
 		fwrite(&tmp, sizeof(tmp), 1, f);
+		list.pushNode(tmp);
 	}
 
 	fclose(f);
+	list.clear();
 }

@@ -10,28 +10,40 @@ enum typeOfWagon {
 struct wagon {
   typeOfWagon type;
   int weight;
+  int id;
 };
 
 std::ostream& operator << (std::ostream &out, const struct wagon w) {
-	out << "{weight: " << w.weight << "; type: " << (!w.type ? "PASSANGER" : "CARGO") << "}";
+	out << "{id: " << w.id << "; " << "weight: " << w.weight << "; type: " << (!w.type ? "PASSANGER" : "CARGO") << "}";
 
   return out;
 }
 
 int main() {
-  Stack<wagon> passangers(11);
-  Stack<wagon> cargos(20);
+  StackVector<wagon> wagons(27);
+  StackVector<wagon> passangers(7);
+  StackVector<wagon> cargos(20);
+  wagon tmp;
 
   int countOfWagons, type, control;
   std::cout << "Enter the count of wagons: ";
   scanf("%d", &countOfWagons);
+  if (countOfWagons > 27) {
+    std::cout << "error: Too many wagons!" << std::endl;
+    return 1;
+  }
 
-  std::cout << "Enter the wights of wagons: ";
+  std::cout << "Enter the weights of wagons: ";
   for (int i = 0; i < countOfWagons; i++) {
-    wagon tmp;
     std::cin >> tmp.weight;
     tmp.type = (tmp.weight < 50) ? PASSANGER : CARGO;
+    tmp.id = i;
 
+    wagons.push(tmp);
+  }
+
+  while (!wagons.isEmpty()) {
+    tmp = wagons.pull();
     if (tmp.type == PASSANGER) {
       if (!passangers.isFull()) {
         passangers.push(tmp);

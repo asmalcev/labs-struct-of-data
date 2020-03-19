@@ -2,6 +2,8 @@
 #include <string.h>
 #include <limits>
 #include <cmath>
+#include <ctime>
+#include <cstdlib>
 #include "linkedlist.cpp"
 
 void clear() {
@@ -17,16 +19,12 @@ int rankOfNumber(int number) {
   return rank;
 }
 
-struct note getNote() {
+struct note getNote(int id) {
   struct note memo;
-  int control = 0, iPart, fPart;
+  int control, iPart, fPart, day, month, year;
+  control = iPart = fPart = day = month = year = 0;
 
-  while (!control) {
-    std::cout << "Enter id" << std::endl;
-    control = scanf("%d", &memo.id);
-    clear();
-  }
-  control = 0;
+  memo.id = id;
   while (!control) {
     std::cout << "Enter name" << std::endl;
     control = scanf("%11s", memo.name);
@@ -61,8 +59,10 @@ struct note getNote() {
   }
   control = 0;
   while (!control) {
-    std::cout << "Enter date of last operation in format DD.MM.YY" << std::endl;
-    control = scanf("%8s", memo.date);
+    std::cout << "Enter date of last operation in format DD.MM.YYYY" << std::endl;
+    control = scanf("%2d.%2d.%4d", &day, &month, &year) == 3;
+    control = day > 0 && day < 32 && month > 0 && month < 13 &&  year > 0;
+    sprintf(memo.date, "%02d.%02d.%04d", day, month, year);
     clear();
   }
 
@@ -130,7 +130,7 @@ void editById(LinkedList &list, int id) {
   for (int i = 0; i < list.getLength(); i++) {
     memo = list.next();
     if (memo.id == id) {
-      memo = getNote();
+      memo = getNote(id);
       memo.id = id;
       list[i] = memo;
       list.clearIterator();
@@ -139,6 +139,38 @@ void editById(LinkedList &list, int id) {
   }
 
   std::cout << ">> There are not any notes with " << id << " id" << std::endl;
+}
+
+void sortedPush(LinkedList &list) {
+  struct note memo, memoTA = getNote(list.getId());
+  bool isAdded = false;
+  int day, month, year;
+  int dayTA, monthTA, yearTA;
+  sscanf(memoTA.date, "%2d.%2d.%4d", &dayTA, &monthTA, &yearTA);
+
+  for (int i = 0; i < list.getLength(); i++) {
+    memo = list.next();
+
+    sscanf(memo.date, "%2d.%2d.%4d", &day, &month, &year);
+
+    if (year < yearTA) {
+      list.addNode(memoTA, i);
+      isAdded = true;
+      break;
+    } else if (year == yearTA && month < monthTA) {
+      list.addNode(memoTA, i);
+      isAdded = true;
+      break;
+    } else if (year == yearTA && month == monthTA && day < dayTA) {
+      list.addNode(memoTA, i);
+      isAdded = true;
+      break;
+    }
+  }
+  if (!isAdded) {
+    list.pushNode(memoTA);
+  }
+  list.clearIterator();
 }
 
 void changeDepositById(LinkedList &list, int id, double difDeposit, char command) {
@@ -184,22 +216,23 @@ void printTheBigestDeposit(LinkedList &list) {
 void listingMode(LinkedList &list) {
   char command;
   struct note memo;
-  int i = 0, len;
+  int i = 0, len, lastPosition;
 	bool errCommand = false;
   while (true) {
+    lastPosition = i;
     system("clear");
-    std::cout << " ID |  DEPOSIT  |     NAME    | CATEGORY |   DATE   " << std::endl;
-    std::cout << "----+-----------+-------------+----------+----------" << std::endl;
+    std::cout << "   DATE    |   ID   |  DEPOSIT  |     NAME    | CATEGORY" << std::endl;
+    std::cout << "-----------+--------+-----------+-------------+----------+" << std::endl;
 
     for (int j = 0; j < 10 && i < list.getLength(); j++, i++) {
       memo = list.next();
       if (memo.isDepositDouble) {
-        printf("%4d|%11.2G|%13s|%10s|%10s\n", memo.id, memo.deposit.depositD, memo.name, memo.category, memo.date);
+        printf("%-11s|%7lu |%11.2G|%13s|%10s\n", memo.date, memo.id, memo.deposit.depositD, memo.name, memo.category);
       } else {
-        printf("%4d|%11lld|%13s|%10s|%10s\n", memo.id, memo.deposit.depositI, memo.name, memo.category, memo.date);
+        printf("%-11s|%7lu |%11lld|%13s|%10s\n", memo.date, memo.id, memo.deposit.depositI, memo.name, memo.category);
       }
     }
-    std::cout << "----+-----------+-------------+----------+----------" << std::endl;
+    std::cout << "-----------+--------+-----------+-------------+----------+" << std::endl;
     std::cout << "                < - prev; next - >" << std::endl;
     std::cout << "                     q - quit" << std::endl;
 
@@ -214,15 +247,11 @@ void listingMode(LinkedList &list) {
     switch (command) {
       case '<':
         clear();
-        if (i - 20 < 0) {
-          i = 0;
+        i = lastPosition;
+        if (i == 0) {
           list.clearIterator();
         } else {
-          if (i % 10 != 0) {
-            i = (i / 10) * 10 - 10;
-          } else {
-            i -= 20;
-          }
+          i -= 10;
           list.setIterator(i);
         }
         break;
@@ -241,6 +270,12 @@ void listingMode(LinkedList &list) {
       
       default:
         clear();
+        i = lastPosition;
+        if (i == 0) {
+          list.clearIterator();
+        } else {
+          list.setIterator(i);
+        }
 				errCommand = true;
         break;
     }
@@ -264,7 +299,7 @@ void fileWork(FILE* f, char* fileName) {
     switch (command) {
       case 'c':
         clear();
-        list.pushNode(getNote());
+        sortedPush(list);
         break;
 
       case 'e':

@@ -4,29 +4,28 @@ union contribution {
 };
 
 struct note {
-	int id;
+	size_t id;
 	contribution deposit;					
 	char name[12];
 	char category[5];
-	char date[9];
+	char date[11];
 	bool isDepositDouble;
 };
 
 std::ostream& operator << (std::ostream &out, const struct note memo) {
-	out << memo.id << " " << memo.name << " " << memo.category << " ";
+	out << memo.date << " " << memo.id << " " << memo.name << " " << memo.category << " ";
 	if (memo.isDepositDouble) {
 		out << memo.deposit.depositD;
 	} else {
 		out << memo.deposit.depositI;
 	}
-	out << " " << memo.date;
 
   return out;
 }
 
 class LinkedList {
 
-private:
+protected:
 	struct Node {
 		struct note data;
 		Node *next;
@@ -37,6 +36,17 @@ private:
 	Node* head;
 	Node* current;
 	Node* tail;
+
+	bool isIdUnique(size_t id) {
+		Node *cur = head;
+		while (cur != NULL) {
+			if (cur->data.id == id) {
+				return false;
+			}
+			cur = cur->next;
+		}
+		return true;
+	}
 
 public:
 	LinkedList() {
@@ -103,7 +113,7 @@ public:
 			throw std::out_of_range("Index is out of range");
 		} else if (index == 0) {
 			shiftNode(data);
-		} else if (index == length - 1) {
+		} else if (index == length) {
 			pushNode(data);
 		} else {
 			Node *cur = head;
@@ -217,7 +227,7 @@ public:
 						maxDeposit = cur->data.deposit.depositD;
 					}
 				} else {
-					if ((double) cur->data.deposit.depositI < maxDeposit) {
+					if ((double) cur->data.deposit.depositI > maxDeposit) {
 						maxDeposit = (double) cur->data.deposit.depositI;
 					}
 				}
@@ -238,5 +248,15 @@ public:
 			}
 			return cur->data;
 		}
+	}
+
+	size_t getId() {
+		srand(time(0));
+		size_t id = rand() % 899999 + 100000;
+
+		while (!isIdUnique(id)) {
+			id = rand() % 899999 + 100000;
+		}
+		return id;
 	}
 };
