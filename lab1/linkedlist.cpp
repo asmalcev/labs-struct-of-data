@@ -1,16 +1,6 @@
-union contribution {
-	long long int depositI;
-	double depositD;
-};
-
-struct note {
-	size_t id;
-	contribution deposit;					
-	char name[12];
-	char category[5];
-	char date[11];
-	bool isDepositDouble;
-};
+#include <iostream>
+#include <string.h>
+#include "linkedlist.hpp"
 
 std::ostream& operator << (std::ostream &out, const struct note memo) {
 	out << memo.date << " " << memo.id << " " << memo.name << " " << memo.category << " ";
@@ -23,240 +13,216 @@ std::ostream& operator << (std::ostream &out, const struct note memo) {
   return out;
 }
 
-class LinkedList {
+LinkedList::LinkedList() {
+	head = NULL;
+	current = NULL;
+	tail = NULL;
+	length = 0;
+}
 
-protected:
-	struct Node {
-		struct note data;
-		Node *next;
-		Node *prev;
-	};
+LinkedList::~LinkedList() {
+	clear();
+}
 
-	int length;
-	Node* head;
-	Node* current;
-	Node* tail;
+void LinkedList::clear() {
+	while (head != NULL) {
+		current = head->next;
+		delete head;
+		head = current;
+	}
+	head = NULL;
+	current = NULL;
+	tail = NULL;
+	length = 0;
+}
 
-	bool isIdUnique(size_t id) {
+int LinkedList::getLength() const {
+	return length;
+}
+
+void LinkedList::insert(Node* cur, Node* tmp) {
+	if (cur->prev == NULL) {
+		tmp->prev = NULL;
+		cur->prev = tmp;
+		tmp->next = cur;
+		head = tmp;
+	} else if (cur->next == NULL) {
+		tmp->next = NULL;
+		tail->next = tmp;
+		tmp->prev = tail;
+		tail = tail->next;
+	} else {
+		tmp->prev = cur->prev;
+		tmp->next = cur;
+		tmp->prev->next = tmp;
+		cur->prev = tmp;
+	}
+}
+
+void LinkedList::push(struct note data) {
+	Node *tmp = new Node;
+	tmp->data = data;
+	if (head == NULL) {
+		tmp->prev = NULL;
+		tmp->next = NULL;
+		head = tail = tmp;
+	} else {
 		Node *cur = head;
-		while (cur != NULL) {
-			if (cur->data.id == id) {
-				return false;
+		int day, month, year;
+  	int dayToAdd, monthToAdd, yearToAdd;
+		bool isAdded = false;
+		sscanf(data.date, "%2d.%2d.%4d", &dayToAdd, &monthToAdd, &yearToAdd);
+
+		while(cur != NULL) {
+			sscanf(cur->data.date, "%2d.%2d.%4d", &day, &month, &year);
+			if (year < yearToAdd) {
+				insert(cur, tmp);
+				isAdded = true;
+				break;
+			} else if (year == yearToAdd && month < monthToAdd) {
+				insert(cur, tmp);
+				isAdded = true;
+				break;
+			} else if (year == yearToAdd && month == monthToAdd && day < dayToAdd) {
+				insert(cur, tmp);
+				isAdded = true;
+				break;
 			}
 			cur = cur->next;
 		}
-		return true;
-	}
 
-public:
-	LinkedList() {
-		head = NULL;
-		current = NULL;
-		tail = NULL;
-		length = 0;
-	}
-
-	~LinkedList() {
-		clear();
-	}
-
-	void clear() {
-		while (head != NULL) {
-			current = head->next;
-			delete head;
-			head = current;
-		}
-		head = NULL;
-		current = NULL;
-		tail = NULL;
-		length = 0;
-	}
-
-	int getLength() const {
-		return length;
-	}
-
-	void pushNode(struct note data) {
-		Node *tmp = new Node;
-		tmp->data = data;
-		tmp->next = NULL;
-
-		if (head == NULL) {
-			head = tail = tmp;
-		} else {
+		if (!isAdded) {
+			tmp->next = NULL;
 			tail->next = tmp;
 			tmp->prev = tail;
 			tail = tail->next;
 		}
-
-		length++;
 	}
+	clearIterator();
+	length++;
+}
 
-	void shiftNode(struct note data) {
-		Node *tmp = new Node;
-		tmp->data = data;
-		tmp->prev = NULL;
-
-		if (head == NULL) {
-			head = tail = tmp;
-		} else {
-			head->prev = tmp;
-			tmp->next = head;
-			head = head->prev;
-		}
-
-		length++;
-	}
-
-	void addNode(struct note data, int index) {
-		if (index < 0 || index >= length) {
-			throw std::out_of_range("Index is out of range");
-		} else if (index == 0) {
-			shiftNode(data);
-		} else if (index == length) {
-			pushNode(data);
-		} else {
-			Node *cur = head;
-			for (int i = 0; i < index - 1; i++) {
-				cur = cur->next;
-			}
-			Node *tmp = new Node;
-			tmp->data = data;
-			tmp->prev = cur;
-			tmp->next = cur->next;
-			tmp->next->prev = tmp;
-			cur->next = tmp;
-			length++;
-		}
-	}
-
-	struct note getHead() const {
-		if (head == NULL) {
-			throw std::out_of_range("List is empty");
-		}
-		return head->data;
-	}
-
-	struct note getTail() const {
-		if (tail == NULL) {
-			throw std::out_of_range("List is empty");
-		}
-		return tail->data;
-	}
-
-	struct note next() {
-		if (current == NULL || current == tail) {
-			current = head;
-			return current->data;
-		}
-		current = current->next;
-		return current->data;
-	}
-
-	struct note prev() {
-		if (current == NULL || current == head) {
-			current = tail;
-			return current->data;
-		}
-		current = current->prev;
-		return current->data;
-	}
-
-	void setIterator(int index) {
+struct note LinkedList::next() {
+	if (current == NULL || current == tail) {
 		current = head;
-		for (int i = 0; i < index - 1; i++) {
-			current = current->next;
-		}
+		return current->data;
 	}
+	current = current->next;
+	return current->data;
+}
 
-	void clearIterator() {
-		current = NULL;
+struct note LinkedList::prev() {
+	if (current == NULL || current == head) {
+		current = tail;
+		return current->data;
 	}
+	current = current->prev;
+	return current->data;
+}
 
-		void remove(int index) {
-		if (index < 0 || index >= length || length == 0) {
-			throw std::out_of_range("Index is out of range");
-		} else if (index == 0) {
-			if (length == 1) {
-				delete head;
-				tail = head = NULL;
-			} else {
-				head = head->next;
-				delete head->prev;
-				head->prev = NULL;
-			}
-		} else if (index == length - 1) {
-			tail = tail->prev;
-			delete tail->next;
-			tail->next = NULL;
-		} else {
-			Node *cur = head;
-			int currentIndex = 0;
-
-			while (currentIndex++ < index) {
-				cur = cur->next;
-			}
-			Node *prevEl = cur->prev;
-			Node *nextEl = cur->next;
-
-			prevEl->next = nextEl;
-			nextEl->prev = prevEl;
-
-			delete cur;
-		}
-		length--;
-		clearIterator();
+void LinkedList::setIterator(int index) {
+	current = head;
+	for (int i = 0; i < index - 1; i++) {
+		current = current->next;
 	}
+}
 
-	void print() {
-		Node *cur = head;
-		while (cur != NULL) {
-			std::cout << cur->data << std::endl;
-			cur = cur->next;
-		}
+void LinkedList::clearIterator() {
+	current = NULL;
+}
+
+int LinkedList::remove(int id) {
+	if (head == NULL) {
+		return 1;
 	}
+	Node *cur = head;
 
-	double findTheBigestDeposit() {
-		Node* cur = head;
-		double maxDeposit = -1;
-
-		while (cur != NULL) {
-			if(!strcmp(cur->data.category, "fast")) {
-				if (cur->data.isDepositDouble) {
-					if (cur->data.deposit.depositD > maxDeposit) {
-						maxDeposit = cur->data.deposit.depositD;
-					}
+	while (cur != NULL) {
+		if (cur->data.id == id) {
+			if (cur->prev == NULL) {
+				if (tail->prev == NULL) {
+					delete head;
+					tail = head = NULL;
 				} else {
-					if ((double) cur->data.deposit.depositI > maxDeposit) {
-						maxDeposit = (double) cur->data.deposit.depositI;
-					}
+					head = head->next;
+					delete head->prev;
+					head->prev = NULL;
+				}
+			} else if (cur->next == NULL) {
+				tail = tail->prev;
+				delete tail->next;
+				tail->next = NULL;
+			} else {
+				Node *prevEl = cur->prev;
+				Node *nextEl = cur->next;
+				prevEl->next = nextEl;
+				nextEl->prev = prevEl;
+				delete cur;
+			}
+			length--;
+			clearIterator();
+			return 0;
+		}
+		cur = cur->next;
+	}
+	return 2;
+}
+
+void LinkedList::print() {
+	Node *cur = head;
+	while (cur != NULL) {
+		std::cout << cur->data << std::endl;
+		cur = cur->next;
+	}
+}
+
+double LinkedList::findTheBigestDeposit() {
+	Node* cur = head;
+	double maxDeposit = -1;
+
+	while (cur != NULL) {
+		if(!strcmp(cur->data.category, "fast")) {
+			if (cur->data.isDepositDouble) {
+				if (cur->data.deposit.depositD > maxDeposit) {
+					maxDeposit = cur->data.deposit.depositD;
+				}
+			} else {
+				if ((double) cur->data.deposit.depositI > maxDeposit) {
+					maxDeposit = (double) cur->data.deposit.depositI;
 				}
 			}
-			cur = cur->next;
 		}
-
-		return maxDeposit;
+		cur = cur->next;
 	}
 
-	struct note &operator[] (int index) {
-		if (index < 0 || index >= length) {
-			throw std::out_of_range("Index is out of range");
-		} else {
-			Node *cur = head;
+	return maxDeposit;
+}
+
+struct note &LinkedList::operator[] (int index) {
+	if (index < 0 || index >= length) {
+		throw std::out_of_range("Index is out of range");
+	} else {
+		Node *cur;
+		if (index > length / 2) {
+			cur = head;
 			for (int i = 0; i < index; i++) {
 				cur = cur->next;
 			}
-			return cur->data;
+		} else {
+			cur = tail;
+			for (int i = length; i > index; i--) {
+				cur = cur->next;
+			}
 		}
+		
+		return cur->data;
 	}
+}
 
-	size_t getId() {
-		srand(time(0));
-		size_t id = rand() % 899999 + 100000;
-
-		while (!isIdUnique(id)) {
-			id = rand() % 899999 + 100000;
-		}
-		return id;
+size_t LinkedList::getId() {
+	if (tail == NULL) {
+		return 100000;
+	} else {
+		return tail->data.id + 1;	 
 	}
-};
+}

@@ -1,3 +1,5 @@
 .vscode
 *.bin
 *-orig*
+*.out
+rand

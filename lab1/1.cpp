@@ -2,9 +2,7 @@
 #include <string.h>
 #include <limits>
 #include <cmath>
-#include <ctime>
-#include <cstdlib>
-#include "linkedlist.cpp"
+#include "linkedlist.hpp"
 
 void clear() {
   while(std::cin.get() != '\n');
@@ -15,7 +13,6 @@ int rankOfNumber(int number) {
   while ((number /= 10) > 0) {
     rank *= 10;
   }
-
   return rank;
 }
 
@@ -82,9 +79,8 @@ LinkedList readFileToList(FILE* f) {
   struct note memo;
 
   while (fread(&memo, sizeof(memo), 1, f)) {
-    list.pushNode(memo);
+    list.push(memo);
   }
-
 	fseek(f, 0, SEEK_SET);
 
   return list;
@@ -98,79 +94,25 @@ void printListToFile(LinkedList &list, FILE* f) {
   }
 }
 
-void deleteById(LinkedList &list, int id) {
-  if (list.getLength() == 0) {
-    std::cout << ">> The list is empty" << std::endl;
-    return;
-  }
-  struct note memo; 
-
-  for (int i = 0; i < list.getLength(); i++) {
-    memo = list.next();
-    if (memo.id == id) {
-      list.remove(i);
-      list.clearIterator();
-      std::cout << ">> " << id << " note deleted" << std::endl;
-      return;
-    }
-  }
-
-  std::cout << ">> There are not any notes with " << id << " id" << std::endl;
-}
-
-
 void editById(LinkedList &list, int id) {
   if (list.getLength() == 0) {
     std::cout << ">> The list is empty" << std::endl;
     return;
   }
   struct note memo;
-  std::cout << "warning: ID field is const" << std::endl;
 
   for (int i = 0; i < list.getLength(); i++) {
     memo = list.next();
     if (memo.id == id) {
       memo = getNote(id);
-      memo.id = id;
-      list[i] = memo;
+      list.remove(id);
+      list.push(memo);
       list.clearIterator();
       return;
     }
   }
 
   std::cout << ">> There are not any notes with " << id << " id" << std::endl;
-}
-
-void sortedPush(LinkedList &list) {
-  struct note memo, memoTA = getNote(list.getId());
-  bool isAdded = false;
-  int day, month, year;
-  int dayTA, monthTA, yearTA;
-  sscanf(memoTA.date, "%2d.%2d.%4d", &dayTA, &monthTA, &yearTA);
-
-  for (int i = 0; i < list.getLength(); i++) {
-    memo = list.next();
-
-    sscanf(memo.date, "%2d.%2d.%4d", &day, &month, &year);
-
-    if (year < yearTA) {
-      list.addNode(memoTA, i);
-      isAdded = true;
-      break;
-    } else if (year == yearTA && month < monthTA) {
-      list.addNode(memoTA, i);
-      isAdded = true;
-      break;
-    } else if (year == yearTA && month == monthTA && day < dayTA) {
-      list.addNode(memoTA, i);
-      isAdded = true;
-      break;
-    }
-  }
-  if (!isAdded) {
-    list.pushNode(memoTA);
-  }
-  list.clearIterator();
 }
 
 void changeDepositById(LinkedList &list, int id, double difDeposit, char command) {
@@ -221,18 +163,18 @@ void listingMode(LinkedList &list) {
   while (true) {
     lastPosition = i;
     system("clear");
-    std::cout << "   DATE    |   ID   |  DEPOSIT  |     NAME    | CATEGORY" << std::endl;
-    std::cout << "-----------+--------+-----------+-------------+----------+" << std::endl;
+    std::cout << "   DATE    |   ID   |  DEPOSIT  |       NAME     | CATEGORY" << std::endl;
+    std::cout << "-----------+--------+-----------+----------------+----------+" << std::endl;
 
     for (int j = 0; j < 10 && i < list.getLength(); j++, i++) {
       memo = list.next();
       if (memo.isDepositDouble) {
-        printf("%-11s|%7lu |%11.2G|%13s|%10s\n", memo.date, memo.id, memo.deposit.depositD, memo.name, memo.category);
+        printf("%-11s|%7lu |%11.2G|%16s|%10s\n", memo.date, memo.id, memo.deposit.depositD, memo.name, memo.category);
       } else {
-        printf("%-11s|%7lu |%11lld|%13s|%10s\n", memo.date, memo.id, memo.deposit.depositI, memo.name, memo.category);
+        printf("%-11s|%7lu |%11lld|%16s|%10s\n", memo.date, memo.id, memo.deposit.depositI, memo.name, memo.category);
       }
     }
-    std::cout << "-----------+--------+-----------+-------------+----------+" << std::endl;
+    std::cout << "-----------+--------+-----------+----------------+----------+" << std::endl;
     std::cout << "                < - prev; next - >" << std::endl;
     std::cout << "                     q - quit" << std::endl;
 
@@ -299,7 +241,11 @@ void fileWork(FILE* f, char* fileName) {
     switch (command) {
       case 'c':
         clear();
-        sortedPush(list);
+        list.push(
+          getNote(
+            list.getId()
+          )
+        );
         break;
 
       case 'e':
@@ -310,7 +256,16 @@ void fileWork(FILE* f, char* fileName) {
       
       case 'd':
         std::cin >> id;
-        deleteById(list, id);
+        switch (list.remove(id)) {
+          case 1:
+            std::cout << ">> The list is empty" << std::endl;
+            break;
+          case 2:
+            std::cout << ">> There are not any notes with " << id << " id" << std::endl;
+            break;
+          default:
+            std::cout << ">> " << id << " note deleted" << std::endl;
+        };
         clear();
         break;
       
