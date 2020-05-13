@@ -5,9 +5,10 @@
 
 int main() {
   std::fstream input;
-  // input.open("../src/inputFiles/input1.txt");
+  input.open("../src/inputFiles/input1.txt");
   // input.open("../src/inputFiles/input2.txt");
-  input.open("../src/inputFiles/input3.txt");
+  // input.open("../src/inputFiles/input3.txt");
+  // input.open("../src/inputFiles/input4.txt");
 
   unsigned int sizeOfGraph = 0;
   input >> sizeOfGraph;
@@ -27,15 +28,15 @@ int main() {
   }
 
   std::cout << "###### Result from Matrix Graph ######" << std::endl;
-  std::cout << "stoks: " << m_graph.findAllStocks() << std::endl;
-  std::cout << "rises: " << m_graph.findAllRises() << std::endl;
-  std::cout << m_graph.countOfTrees() << std::endl;
+  std::cout << "index of stoks: " << m_graph.findAllStocks() << std::endl;
+  std::cout << "index of rises: " << m_graph.findAllRises() << std::endl;
+  std::cout << "count of trees: " << m_graph.countOfTrees() << std::endl;
   std::cout << "######################################" << std::endl;
 
   std::cout << "######  Result from List Graph  ######" << std::endl;
-  std::cout << "stoks: " << l_graph.findAllStocks() << std::endl;
-  std::cout << "rises: " << l_graph.findAllRises() << std::endl;
-  std::cout << l_graph.countOfTrees() << std::endl;
+  std::cout << "index of stoks: " << l_graph.findAllStocks() << std::endl;
+  std::cout << "index of rises: " << l_graph.findAllRises() << std::endl;
+  std::cout << "count of trees: " << l_graph.countOfTrees() << std::endl;
   std::cout << "######################################" << std::endl;
 
   input.close();
