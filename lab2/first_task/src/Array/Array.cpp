@@ -6,6 +6,21 @@ Array::Array(int len) {
   arr = new int[len];
 }
 
+Array::Array(int len, int value) {
+  fulledSize = realSize = len;
+  arr = new int[len];
+  for (int i = 0; i < len; i++) {
+    arr[i] = value;
+  }
+}
+
+Array::Array(const Array &other) {
+  fulledSize = other.fulledSize;
+  realSize = other.realSize;
+  arr = new int[realSize];
+  memcpy(arr, other.arr, fulledSize * sizeof *other.arr);
+}
+
 Array::~Array() {
   delete[] arr;
 }
@@ -64,6 +79,20 @@ void Array::map(int (*foo)(int)) {
   for (int i = 0; i < fulledSize; i++) {
     arr[i] = foo(arr[i]);
   }
+}
+
+bool Array::some(bool (*foo)(int)) {
+  for (int i = 0; i < fulledSize; i++) {
+    if (foo(arr[i])) return true;
+  }
+  return false;
+}
+
+bool Array::every(bool (*foo)(int)) {
+  for (int i = 0; i < fulledSize; i++) {
+    if (!foo(arr[i])) return false;
+  }
+  return true;
 }
 
 void Array::insert(Array right, int position) {

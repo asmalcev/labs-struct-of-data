@@ -29,5 +29,6 @@ public:
 	void setIterator(int index);
 	void clearIterator();
 	void remove(int index);
+	bool empty();
 
 };

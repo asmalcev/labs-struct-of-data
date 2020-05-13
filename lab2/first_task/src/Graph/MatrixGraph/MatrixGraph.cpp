@@ -52,3 +52,28 @@ Array* MatrixGraph::findAllRises() {
   
   return rises;
 }
+
+void MatrixGraph::dfs(int v, Array used, int& count) {
+  int i,j;
+  used[v] = 1;
+  if (used.every([] (int value) { return (bool) value; })) {
+    count++;
+  } else {
+    for (i = 0; i < length; i++) {
+      j = i + v * length;
+      if (!used[i] && matrix[j] != 0) {
+        dfs(i, used, count);
+      }
+    }
+  }
+}
+
+int MatrixGraph::countOfTrees() {
+  Array used(length, 0);
+  int count = 0;
+  for (int i = 0; i < length; i++) {
+    dfs(i, used, count);
+  }
+
+  return count;
+}

@@ -10,6 +10,8 @@ private:
 public:
 
   Array(int len = 0);
+  Array(int len, int value);
+  Array(const Array &other);
   ~Array();
   void push(int elem);
   void remove(int index);
@@ -19,6 +21,8 @@ public:
   void set(int index, int value) const;
   int &operator [] (int index);
   void map(int (*foo)(int));
+  bool some(bool (*foo)(int));
+  bool every(bool (*foo)(int));
   void insert(Array right, int position = -1);
   void insert(int* right, int position = -1);
 };

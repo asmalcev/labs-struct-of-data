@@ -5,6 +5,7 @@ class MatrixGraph {
 private:
   int* matrix;
   unsigned char length;
+  void dfs(int, Array, int&);
 
 public:
   MatrixGraph(unsigned char);
@@ -13,5 +14,6 @@ public:
   void removeEdge(int, int);
   Array* findAllStocks();
   Array* findAllRises();
+  int countOfTrees();
 
 };

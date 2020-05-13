@@ -124,37 +124,42 @@ void LinkedList::clearIterator() {
 	current = NULL;
 }
 
-void LinkedList::remove(int index) {
-	if (index < 0 || index >= length || length == 0) {
-		throw std::out_of_range("Index is out of range");
-	} else if (index == 0) {
-		if (length == 1) {
-			delete head;
-			tail = head = NULL;
-		} else {
-			head = head->next;
-			delete head->prev;
-			head->prev = NULL;
-		}
-	} else if (index == length - 1) {
-		tail = tail->prev;
-		delete tail->next;
-		tail->next = NULL;
-	} else {
-		Node *cur = head;
-		int currentIndex = 0;
-
-		while (currentIndex++ < index) {
-			cur = cur->next;
-		}
-		Node *prevEl = cur->prev;
-		Node *nextEl = cur->next;
-
-		prevEl->next = nextEl;
-		nextEl->prev = prevEl;
-
-		delete cur;
+void LinkedList::remove(int value) {
+	if (head == NULL) {
+		return;
 	}
-	length--;
-	clearIterator();
+	Node *cur = head;
+
+	while (cur != NULL) {
+		if (cur->data == value) {
+			if (cur->prev == NULL) {
+				if (tail->prev == NULL) {
+					delete head;
+					tail = head = NULL;
+				} else {
+					head = head->next;
+					delete head->prev;
+					head->prev = NULL;
+				}
+			} else if (cur->next == NULL) {
+				tail = tail->prev;
+				delete tail->next;
+				tail->next = NULL;
+			} else {
+				Node *prevEl = cur->prev;
+				Node *nextEl = cur->next;
+				prevEl->next = nextEl;
+				nextEl->prev = prevEl;
+				delete cur;
+			}
+			length--;
+			clearIterator();
+			return;
+		}
+		cur = cur->next;
+	}
+}
+
+bool LinkedList::empty() {
+	return head == NULL;
 }
