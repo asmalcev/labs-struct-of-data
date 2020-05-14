@@ -1,6 +1,6 @@
 #include "MatrixGraph.hpp"
 
-MatrixGraph::MatrixGraph(unsigned char length) {
+MatrixGraph::MatrixGraph(unsigned int length) {
   matrix = new int[length * length];
   this->length = length;
 }
@@ -71,9 +71,40 @@ void MatrixGraph::dfs(int v, Array used, int& count) {
 int MatrixGraph::countOfTrees() {
   Array used(length, 0);
   int count = 0;
-  for (int i = 0; i < length; i++) {
+
+  for (int i = 0; i < length && !count; i++) {
     dfs(i, used, count);
   }
 
   return count;
 }
+
+void MatrixGraph::dfs1(int v, Array& used) {
+  int i, j;
+  used[v] = 1;
+
+  for (i = 0; i < length; i++) {
+    j = i + v * length;
+    if (!used[i] && matrix[j] != 0) {
+      dfs1(i, used);
+    }
+  }
+}
+
+int MatrixGraph::minCountOfTrees() {
+  if (countOfTrees()) {
+    return 1;
+  }
+  Array used(length, 0);
+  int cNum = 0;
+
+  for (int i = 0; i < length; i++) {
+    if (!used[i]) {
+      dfs1(i, used);
+      cNum++;
+    }
+  }
+
+  return cNum;
+}
+

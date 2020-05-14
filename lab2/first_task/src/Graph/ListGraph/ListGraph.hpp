@@ -7,6 +7,8 @@ private:
   LinkedList* lists;
   unsigned char length;
   void dfs(int, Array, int&);
+  void dfs1(int, Array&);
+  int countOfTrees();
 
 public:
   ListGraph(unsigned char);
@@ -15,6 +17,6 @@ public:
   void removeEdge(int, int);
   Array* findAllStocks();
   Array* findAllRises();
-  int countOfTrees();
+  int minCountOfTrees();
 
 };

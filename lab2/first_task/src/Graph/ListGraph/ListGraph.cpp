@@ -49,7 +49,7 @@ Array* ListGraph::findAllRises() {
 }
 
 void ListGraph::dfs(int v, Array used, int& count) {
-  int i,j;
+  int i;
   used[v] = 1;
   if (used.every([] (int value) { return (bool) value; })) {
     count++;
@@ -60,7 +60,7 @@ void ListGraph::dfs(int v, Array used, int& count) {
         dfs(index, used, count);
       }
     }
-    lists[j].clearIterator();
+    lists[v].clearIterator();
   }
 }
 
@@ -72,4 +72,34 @@ int ListGraph::countOfTrees() {
   }
 
   return count;
+}
+
+void ListGraph::dfs1(int v, Array& used) {
+  int i;
+  used[v] = 1;
+
+  for (i = 0; i < lists[v].getLength(); i++) {
+    int index = lists[v].next();
+    if (!used[index]) {
+      dfs1(index, used);
+    }
+  }
+  lists[v].clearIterator();
+}
+
+int ListGraph::minCountOfTrees() {
+  if (countOfTrees()) {
+    return 1;
+  }
+  Array used(length, 0);
+  int cNum = 0;
+
+  for (int i = 0; i < length; i++) {
+    if (!used[i]) {
+      dfs1(i, used);
+      cNum++;
+    }
+  }
+
+  return cNum;
 }
