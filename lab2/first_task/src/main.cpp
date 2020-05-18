@@ -5,10 +5,10 @@
 
 int main() {
   std::fstream input;
-  // input.open("../src/inputFiles/input1.txt");
+  input.open("../src/inputFiles/input1.txt");
   // input.open("../src/inputFiles/input2.txt");
   // input.open("../src/inputFiles/input3.txt");
-  input.open("../src/inputFiles/input4.txt");
+  // input.open("../src/inputFiles/input4.txt");
 
   unsigned int sizeOfGraph = 0;
   input >> sizeOfGraph;
