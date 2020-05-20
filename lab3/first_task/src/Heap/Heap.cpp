@@ -1,13 +1,11 @@
 #include "Heap.hpp"
 #include <iostream>
 
-Heap::Heap(unsigned capacity)
-  : size(0), capacity(capacity), arr(new int[capacity]) 
+Heap::Heap(unsigned capacity, int* arr, counter& c)
+  : size(0), capacity(capacity), arr(arr), c(c)
   {}
 
-Heap::~Heap() {
-  delete [] arr;
-}
+Heap::~Heap() {}
 
 int Heap::getMin() {
   if (size == 0) {
@@ -19,6 +17,8 @@ int Heap::getMin() {
 
   int root = arr[0];
   arr[0] = arr[--size];
+  c.switches++;
+  c.otherEq++;
   heapify(0);
   return root;
 }
@@ -30,14 +30,18 @@ void Heap::insert(int value) {
 
   size++;
   int i = size - 1;
+  c.otherEq++;
   arr[i] = value;
+  c.switches++;
 
   int tmp;
-  while (i != 0 && arr[i] < arr[(i - 1) / 2]) {
+  while (i != 0 && arr[i] > arr[(i - 1) / 2]) {
     tmp = arr[i];
     arr[i] = arr[(i - 1) / 2];
     arr[(i - 1) / 2] = tmp;
+    c.switches += 3;
     i = (i - 1) / 2;
+    c.otherEq++;
   }
 }
 
@@ -45,18 +49,23 @@ void Heap::heapify(unsigned i) {
   int j, tmp;
   while (2 * i + 1 < size) {
     j = i;
-    if (arr[2 * i + 1] < arr[i]) {
+    c.otherEq++;
+    if (arr[2 * i + 1] > arr[i]) {
       j = 2 * i + 1;
+      c.otherEq++;
     }
-    if (2 * i + 2 < size && arr[2 * i + 2] < arr[j]) {
+    if (2 * i + 2 < size && arr[2 * i + 2] > arr[j]) {
       j = 2 * i + 2;
+      c.otherEq++;
     }
     if (i == j) {
-        break;
+      break;
     }
     tmp = arr[i];
     arr[i] = arr[j];
     arr[j] = tmp;
+    c.switches += 3;
     i = j;
+    c.otherEq++;
   }
 }
