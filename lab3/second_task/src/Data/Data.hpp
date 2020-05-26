@@ -1,9 +1,17 @@
 #pragma once
+#include <cstring>
 
 struct Data {
-  const char* value;
-  const char* key;
+  char* value;
+  unsigned key;
 
-  explicit Data(const char* value, const char* key)
-    : value(value), key(key) {}
+  explicit Data(const char* strValue, unsigned key)
+    : key(key) {
+      unsigned len = strlen(strValue);
+      value = new char[len];
+      strncpy(value, strValue, len); 
+    }
+  ~Data() {
+    delete value;
+  }
 };

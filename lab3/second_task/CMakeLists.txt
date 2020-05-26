@@ -9,7 +9,7 @@ file(GLOB CPP_SOURCES
   "src/LinkedList/*.cpp",
 )
 
-include_directories(${LAB3_2_SOURCE_DIR}/src/)
+include_directories(${PROJECT_SOURCE_DIR}/src/)
 include_directories(${LAB3_2_SOURCE_DIR}/src/RedBlackTree)
 include_directories(${LAB3_2_SOURCE_DIR}/src/HashMap)
 include_directories(${LAB3_2_SOURCE_DIR}/src/LinkedList)

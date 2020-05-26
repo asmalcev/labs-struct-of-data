@@ -7,13 +7,13 @@ private:
   LinkedList* table;
   unsigned size;
 
-  unsigned hash(const char*) const;
+  unsigned hash(unsigned);
 
 public:
   explicit HashMap(unsigned);
   ~HashMap();
-  Data& get();
-  void put(Data);
+  Data* get(unsigned);
+  void put(int, const char *);
 
   void print();
 };
