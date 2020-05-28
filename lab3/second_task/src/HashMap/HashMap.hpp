@@ -1,6 +1,5 @@
 #pragma once
 #include "LinkedList.hpp"
-#include "Data.hpp"
 
 class HashMap {
 private:
@@ -12,8 +11,8 @@ private:
 public:
   explicit HashMap(unsigned);
   ~HashMap();
-  Data* get(unsigned);
-  void put(int, const char *);
+  int get(unsigned, unsigned&);
+  void put(unsigned);
 
   void print();
 };

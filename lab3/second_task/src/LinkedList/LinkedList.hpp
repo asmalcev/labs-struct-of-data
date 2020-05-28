@@ -1,11 +1,10 @@
 #include <iostream>
-#include "Data.hpp"
 
 class LinkedList {
 
 private:
 	struct Node {
-		Data * data;
+		int data;
 		Node * next;
 		Node * prev;
 	};
@@ -20,11 +19,11 @@ public:
 	~LinkedList();
 	void clear();
 	const int getLength();
-	void pushNode(Data * data);
-	void shiftNode(Data * data);
-	void addNode(Data * data, int index);
-	Data * next();
-	Data * prev();
+	void pushNode(int data);
+	void shiftNode(int data);
+	void addNode(int data, int index);
+	int next();
+	int prev();
 	void setIterator(int index);
 	void clearIterator();
 	void remove(unsigned key);

@@ -1,5 +1,4 @@
 #pragma once
-#include "Data.hpp"
 
 enum Color {
   Red,
@@ -7,13 +6,13 @@ enum Color {
 };
 
 struct Node {
-  Data* value;
+  int value;
   Node* right; 
   Node* left;
   Node* parent;
   Color c;
 
-  Node(Data* value)
+  Node(int value)
     : value(value),
       left(nullptr),
       right(nullptr),
@@ -34,8 +33,8 @@ private:
 public:
   RedBlackTree();
   ~RedBlackTree();
-  void insert(unsigned, char const *);
+  void insert(unsigned);
   void symTracePrint();
-  Data * find(unsigned);
+  int find(unsigned, unsigned&);
 
 };

@@ -13,7 +13,6 @@ RedBlackTree::~RedBlackTree() {
 void RedBlackTree::deleteSubTree(Node * pt) {
   if (pt->left != nullptr) deleteSubTree(pt->left);
   if (pt->right != nullptr) deleteSubTree(pt->right);
-  delete pt->value;
   delete pt;
 }
 
@@ -22,7 +21,7 @@ Node * RedBlackTree::BSTInsert(Node * root, Node * pt) {
     return pt;
   }
 
-  if (pt->value->key < root->value->key) {
+  if (pt->value < root->value) {
     root->left = BSTInsert(root->left, pt);
     root->left->parent = root;
   } else {
@@ -33,8 +32,8 @@ Node * RedBlackTree::BSTInsert(Node * root, Node * pt) {
   return root;
 } 
 
-void RedBlackTree::insert(unsigned key, char const * value) {
-  Node* pt = new Node(new Data(value, key));
+void RedBlackTree::insert(unsigned key) {
+  Node* pt = new Node(key);
 
   root = BSTInsert(root, pt);
   
@@ -158,22 +157,25 @@ void RedBlackTree::symTracePrintRec(Node * pt) {
     return;
   }
   symTracePrintRec(pt->left);
-  std::cout << pt->value->key << " - " << pt->value->value << " ";
+  std::cout << pt->value << " ";
   symTracePrintRec(pt->right);
 }
 
-Data * RedBlackTree::find(unsigned key) {
+int RedBlackTree::find(unsigned key, unsigned& c) {
   Node * p = root;
 
   while (p != nullptr) {
-    if (p->value->key == key) {
+    if (p->value == key) {
+      c += 2;
       return p->value;
-    } else if (p->value->key < key) {
+    } else if (p->value < key) {
+      c += 2;
       p = p->right;
     } else {
+      c++;
       p = p->left;
     }
   }
 
-  return nullptr;
+  return -1;
 }

@@ -28,7 +28,7 @@ const int LinkedList::getLength() {
 	return length;
 }
 
-void LinkedList::pushNode(Data * data) {
+void LinkedList::pushNode(int data) {
 	Node *tmp = new Node;
 	tmp->data = data;
 	tmp->next = NULL;
@@ -44,7 +44,7 @@ void LinkedList::pushNode(Data * data) {
 	length++;
 }
 
-void LinkedList::shiftNode(Data * data) {
+void LinkedList::shiftNode(int data) {
 	Node *tmp = new Node;
 	tmp->data = data;
 	tmp->prev = NULL;
@@ -60,7 +60,7 @@ void LinkedList::shiftNode(Data * data) {
 	length++;
 }
 
-void LinkedList::addNode(Data * data, int index) {
+void LinkedList::addNode(int data, int index) {
 	if (index < 0 || index >= length) {
 		throw std::out_of_range("Index is out of range");
 	} else if (index == 0) {
@@ -82,7 +82,7 @@ void LinkedList::addNode(Data * data, int index) {
 	}
 }
 
-Data* LinkedList::next() {
+int LinkedList::next() {
 	if (current == NULL || current == tail) {
 		current = head;
 		return current->data;
@@ -91,7 +91,7 @@ Data* LinkedList::next() {
 	return current->data;
 }
 
-Data* LinkedList::prev() {
+int LinkedList::prev() {
 	if (current == NULL || current == head) {
 		current = tail;
 		return current->data;
@@ -118,7 +118,7 @@ void LinkedList::remove(unsigned key) {
 	Node *cur = head;
 
 	while (cur != NULL) {
-		if (cur->data->key == key) {
+		if (cur->data == key) {
 			if (cur->prev == NULL) {
 				if (tail->prev == NULL) {
 					delete head;
