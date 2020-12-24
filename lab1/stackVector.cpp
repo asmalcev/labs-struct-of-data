@@ -39,7 +39,7 @@ public:
 		if (size == 0) {
 			throw std::out_of_range("Stack is empty");
 		} else {
-      return arr[size-- - 1];
+      return arr[--size];
     }
   }
 
